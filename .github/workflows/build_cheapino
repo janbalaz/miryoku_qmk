@@ -1,0 +1,33 @@
+name: Build Latest Miryoku for Cheapino v2
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/qmk/qmk_cli
+    steps:
+      - name: Checkout Miryoku QMK (The Source of Truth)
+        uses: actions/checkout@v4
+        with:
+          repository: manna-harbour/miryoku_qmk
+          ref: miryoku
+
+      - name: Inject Cheapino v2 Hardware Files
+        run: |
+          mkdir -p keyboards/cheapino
+          # Download hardware definition from Tompi's repo
+          curl -L https://github.com/tompi/qmk_firmware/archive/refs/heads/cheapinov2.tar.gz | tar xz --strip-components=2 -C keyboards/cheapino qmk_firmware-cheapinov2/keyboards/cheapino
+          # Clean up any conflicting keymaps in the hardware folder
+          rm -rf keyboards/cheapino/keymaps/manna-harbour_miryoku
+
+      - name: Compile Firmware
+        run: |
+          git config --global --add safe.directory '*'
+          # Change MIRYOKU_ALPHAS to QWERTY, DVORAK, or COLEMAKDH as needed
+          qmk compile -kb cheapino -km manna-harbour_miryoku -e MIRYOKU_ALPHAS=COLEMAKDH -e MIRYOKU_EXTRA=COLEMAKDH -e MIRYOKU_CLIPBOARD=MAC
+
+      - name: Upload Firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: cheapino_miryoku_latest
+          path: .build/*.uf2
