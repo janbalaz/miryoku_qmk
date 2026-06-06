@@ -36,8 +36,8 @@ jobs:
               json.dump(d, f)
               f.truncate()
           "
-          # Safely append the compilation macro using printf to avoid shell character interpretation bugs
-          printf "\n#define RGBLED_NUM 1\n" >> keyboards/cheapino/config.h
+          # Safely append the LED count and map it to the physical internal pin (GP16) of the RP2040-Zero
+          printf "\n#define RGBLED_NUM 1\n#define RGB_DI_PIN GP16\n" >> keyboards/cheapino/config.h
 
       - name: Install QMK Python Dependencies
         run: |
