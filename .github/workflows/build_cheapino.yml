@@ -19,10 +19,25 @@ jobs:
           # Clean up any legacy layout files that might conflict
           rm -rf keyboards/cheapino/keymaps/manna-harbour_miryoku
 
-      - name: Patch info.json for Modern QMK Compatibility
+      - name: Patch Hardware Definitions for Modern QMK
         run: |
-          # Direct inline injection to satisfy modern QMK validation checks
-          python3 -c "import json; f=open('keyboards/cheapino/info.json','r+'); d=json.load(f); d['matrix_size']={'rows':16,'cols':16}; f.seek(0); json.dump(d,f); f.truncate()"
+          # Dynamically match matrix_size to the exact hardware pins and define the status RGB
+          python3 -c "
+          import json
+          with open('keyboards/cheapino/info.json', 'r+') as f:
+              d = json.load(f)
+              matrix_pins = d.get('matrix_pins', {})
+              rows = len(matrix_pins.get('rows', [0]*4))
+              cols = len(matrix_pins.get('cols', [0]*12))
+              d['matrix_size'] = {'rows': rows, 'cols': cols}
+              if 'rgblight' not in d: d['rgblight'] = {}
+              d['rgblight']['led_count'] = 1
+              f.seek(0)
+              json.dump(d, f)
+              f.truncate()
+          "
+          # Inject the missing compilation macro directly into the config header
+          echo -e "\n#define RGBLED_NUM 1" >> keyboards/cheapino/config.h
 
       - name: Install QMK Python Dependencies
         run: |
