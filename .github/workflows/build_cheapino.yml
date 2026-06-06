@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cheapino_miryoku_latest
-          path: .build/*.uf2
+          path: "*.uf2"
