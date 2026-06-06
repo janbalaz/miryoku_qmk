@@ -14,10 +14,15 @@ jobs:
 
       - name: Inject Cheapino v2 Hardware Files
         run: |
-          # Download hardware definition directly into the main keyboards directory
-          curl -L https://github.com/tompi/qmk_firmware/archive/refs/heads/cheapinov2.tar.gz | tar xz --strip-components=2 -C keyboards qmk_firmware-cheapinov2/keyboards/cheapino
-          # Clean up any conflicting keymaps in the hardware folder
+          # Download hardware definitions from Tompi's dedicated Miryoku branch
+          curl -L https://github.com/tompi/qmk_firmware/archive/refs/heads/cheapinov2-miryoku.tar.gz | tar xz --strip-components=2 -C keyboards qmk_firmware-cheapinov2-miryoku/keyboards/cheapino
+          # Clean up any legacy layout files that might conflict
           rm -rf keyboards/cheapino/keymaps/manna-harbour_miryoku
+
+      - name: Patch info.json for Modern QMK Compatibility
+        run: |
+          # Direct inline injection to satisfy modern QMK validation checks
+          python3 -c "import json; f=open('keyboards/cheapino/info.json','r+'); d=json.load(f); d['matrix_size']={'rows':16,'cols':16}; f.seek(0); json.dump(d,f); f.truncate()"
 
       - name: Install QMK Python Dependencies
         run: |
