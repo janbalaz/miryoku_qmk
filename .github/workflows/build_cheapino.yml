@@ -14,15 +14,13 @@ jobs:
 
       - name: Inject Cheapino v2 Hardware Files
         run: |
-          mkdir -p keyboards/cheapino
-          # Download hardware definition from Tompi's repo
-          curl -L https://github.com/tompi/qmk_firmware/archive/refs/heads/cheapinov2.tar.gz | tar xz --strip-components=2 -C keyboards/cheapino qmk_firmware-cheapinov2/keyboards/cheapino
+          # Download hardware definition directly into the main keyboards directory
+          curl -L https://github.com/tompi/qmk_firmware/archive/refs/heads/cheapinov2.tar.gz | tar xz --strip-components=2 -C keyboards qmk_firmware-cheapinov2/keyboards/cheapino
           # Clean up any conflicting keymaps in the hardware folder
           rm -rf keyboards/cheapino/keymaps/manna-harbour_miryoku
 
       - name: Install QMK Python Dependencies
         run: |
-          # Installs required dependencies into the container's isolated environment
           /opt/uv/tools/qmk/bin/python3 -m pip install -r requirements.txt
 
       - name: Compile Firmware
